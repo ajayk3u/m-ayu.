@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AyuPulse</title>
+<style>
+  :root{
+    --bg:#050810; --panel:#0c1220; --card:#0f1727; --card2:#141d31; --card3:#182238; --line:#1e293e; --line2:#263248;
+    --cyan:#38d4f5; --cyan-dim:#0d3446; --cyan-text:#7fe3fb;
+    --red:#f0453f; --red-dim:#3d1512; --red-text:#ff9b96;
+    --amber:#f5a623; --amber-dim:#3a2a08; --amber-text:#fdd28a;
+    --emerald:#12c48b; --emerald-dim:#0a3327;
+    --text:#eef2f8; --sub:#8b96ac; --sub2:#5d6784;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--text);}
+  .frame{max-width:460px;margin:0 auto;padding:0 0 40px;min-height:100vh;background:var(--bg);position:relative;}
+  .hidden{display:none;}
+  .roleswitch{display:flex;gap:6px;padding:10px 12px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;}
+  .role-btn{flex:1;padding:8px 4px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--sub);font-size:11.5px;font-weight:700;cursor:pointer;}
+  .role-btn.active{background:var(--cyan-dim);color:var(--cyan-text);border-color:var(--cyan);}
+
+  /* ===== HOME (SCREEN 1) ===== */
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);}
+  .brand .name{font-size:17px;font-weight:700;}
+  .brand .sub{font-size:10.5px;color:var(--sub);margin-top:1px;}
+  .hstatus{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--emerald);font-weight:600;margin-top:3px;}
+  .pdot{width:7px;height:7px;border-radius:50%;background:var(--emerald);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(18,196,139,.5);}70%{box-shadow:0 0 0 6px rgba(18,196,139,0);}100%{box-shadow:0 0 0 0 rgba(18,196,139,0);}}
+  .hright{text-align:right;}
+  .langbtn{background:var(--card2);border:1px solid var(--line);color:var(--text);font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .connected{font-size:10px;color:var(--sub);margin-top:5px;display:flex;align-items:center;gap:5px;justify-content:flex-end;}
+  .connected .cdot{width:6px;height:6px;border-radius:50%;background:var(--cyan);}
+  .intro{text-align:center;padding:26px 20px 18px;}
+  .intro h1{font-size:20px;font-weight:700;margin:0 0 6px;}
+  .intro p{font-size:13px;color:var(--sub);margin:0;}
+  .section{padding:0 16px;}
+  .section-head{font-size:11.5px;font-weight:700;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin:26px 4px 4px;}
+  .section-sub{font-size:12.5px;color:var(--sub);margin:0 4px 14px;}
+  .svc-grid{display:flex;flex-direction:column;gap:12px;}
+  .svc-card{border-radius:18px;padding:18px;border:1px solid var(--line);cursor:pointer;}
+  .svc-card.aid{background:linear-gradient(180deg,var(--card) 0%,var(--card2) 100%);}
+  .svc-card.sos{background:var(--red-dim);border-color:#5a201c;}
+  .svc-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .svc-card.aid .svc-icon{background:var(--cyan-dim);}
+  .svc-card.sos .svc-icon{background:rgba(240,69,63,.18);}
+  .svc-title{font-size:18px;font-weight:700;margin:0 0 4px;}
+  .svc-card.sos .svc-title{color:#fff;}
+  .svc-desc{font-size:12.5px;color:var(--sub);margin:0 0 12px;line-height:1.5;}
+  .svc-card.sos .svc-desc{color:#f3c6c3;}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .tag{font-size:10.5px;padding:4px 9px;border-radius:20px;background:var(--card2);color:var(--sub);border:1px solid var(--line2);}
+  .svc-card.sos .tag{background:rgba(255,255,255,.08);color:#f3c6c3;border-color:rgba(255,255,255,.12);}
+  .svc-btn{width:100%;padding:12px;border-radius:11px;border:none;font-size:13.5px;font-weight:700;cursor:pointer;}
+  .svc-btn.aid{background:var(--cyan);color:#03222c;}
+  .svc-btn.sos{background:var(--red);color:#fff;}
+  .triage-grid{display:flex;flex-direction:column;gap:12px;}
+  .tri-card{border-radius:16px;padding:16px;border:1px solid var(--line);background:var(--card);}
+  .tri-card.critical{border-color:#4a221f;}
+  .tri-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .tri-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tri-card.critical .tri-icon{background:rgba(240,69,63,.16);color:var(--red-text);}
+  .tri-card.normal .tri-icon{background:var(--cyan-dim);color:var(--cyan-text);}
+  .tri-title{font-size:14.5px;font-weight:700;}
+  .tri-card.critical .tri-title{color:#ffb3af;}
+  .tri-card.normal .tri-title{color:var(--cyan-text);}
+  .tri-desc{font-size:12px;color:var(--sub);margin:0 0 10px;}
+  .tri-examples{font-size:11px;color:var(--sub2);margin:0 0 12px;line-height:1.6;}
+  .tri-btn{width:100%;padding:10px;border-radius:9px;border:1px solid;font-size:12.5px;font-weight:700;cursor:pointer;background:transparent;}
+  .tri-btn.critical{color:var(--red-text);border-color:#5a2b27;}
+  .tri-btn.normal{color:var(--cyan-text);border-color:#1f4e5c;}
+  .util{margin:28px 16px 0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px;}
+  .util-row{display:flex;align-items:center;justify-content:space-between;padding:12px;}
+  .util-row+.util-row{border-top:1px solid var(--line);}
+  .util-title{font-size:12.5px;font-weight:600;}
+  .util-status{font-size:10.5px;color:var(--emerald);display:flex;align-items:center;gap:5px;}
+  .util-status .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);}
+  .util-btn{font-size:12px;font-weight:700;padding:8px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--text);cursor:pointer;}
+  .util-btn.danger{background:var(--red);color:#fff;border:none;}
+
+  /* ===== INTAKE (SCREEN 2) ===== */
+  .ihead{padding:14px 16px;border-bottom:1px solid var(--line);}
+  .backbtn{background:none;border:none;color:var(--sub);font-size:12.5px;cursor:pointer;padding:0 0 10px;}
+  .ihead h1{font-size:17px;margin:0 0 2px;}
+  .ihead .isub{font-size:11.5px;color:var(--sub);margin:0 0 10px;}
+  .prio-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;margin-bottom:8px;}
+  .prio-badge.critical{background:var(--red-dim);color:var(--red-text);}
+  .prio-badge.normal{background:var(--emerald-dim);color:var(--emerald);}
+  .istatus-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .istatus{font-size:10.5px;color:var(--sub);display:flex;align-items:center;gap:5px;}
+  .istatus .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 16px;}
+  .card h2{font-size:13.5px;font-weight:700;margin:0 0 12px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:11px;color:var(--sub);margin-bottom:5px;font-weight:600;}
+  .field input[type=text],.field input[type=number],.field textarea{width:100%;background:var(--card2);border:1px solid var(--line2);border-radius:9px;padding:10px 11px;color:var(--text);font-size:13.5px;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--cyan);}
+  .seg{display:flex;gap:8px;}
+  .seg button{flex:1;padding:10px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--sub);font-size:12.5px;font-weight:600;cursor:pointer;}
+  .seg button.active{background:var(--cyan-dim);color:var(--cyan-text);border-color:var(--cyan);}
+  #prioSeg button.crit-active{background:var(--red-dim);color:var(--red-text);border-color:var(--red);}
+  #prioSeg button.norm-active{background:var(--emerald-dim);color:var(--emerald);border-color:var(--emerald);}
+  .loc-btns{display:flex;flex-direction:column;gap:8px;}
+  .loc-btns button.active{background:var(--red-dim);color:var(--red-text);border-color:#5a201c;}
+
+  .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .vcard{background:var(--card2);border:1px solid var(--line2);border-radius:11px;padding:11px;}
+  .vcard.full{grid-column:1 / -1;}
+  .vlabel{font-size:10.5px;color:var(--sub);font-weight:600;margin-bottom:6px;}
+  .vinput-row{display:flex;align-items:baseline;gap:6px;}
+  .vinput-row input{width:100%;background:transparent;border:none;font-size:22px;font-weight:700;color:var(--text);font-family:'SF Mono',Consolas,monospace;padding:0;}
+  .vinput-row input:focus{outline:none;}
+  .vunit{font-size:10.5px;color:var(--sub2);white-space:nowrap;}
+  .vstate{display:inline-block;margin-top:6px;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.3px;}
+  .vstate.normal{background:var(--emerald-dim);color:var(--emerald);}
+  .vstate.warning{background:var(--amber-dim);color:var(--amber-text);}
+  .vstate.critical{background:var(--red-dim);color:var(--red-text);}
+  .quickbtns{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+  .quickbtns button{font-size:10.5px;padding:5px 9px;border-radius:7px;border:1px solid var(--line2);background:var(--card3);color:var(--sub);cursor:pointer;}
+  .quickbtns button.active{background:var(--cyan-dim);color:var(--cyan-text);border-color:var(--cyan);}
+  .gcs-row{display:flex;align-items:center;gap:10px;}
+  .gcs-row input[type=range]{flex:1;}
+  .gcs-val{font-size:20px;font-weight:700;font-family:'SF Mono',Consolas,monospace;min-width:30px;text-align:center;}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:7px 12px;border-radius:20px;background:var(--card2);border:1px solid var(--line2);color:var(--sub);font-size:11.5px;cursor:pointer;}
+  .chip.sel{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan-text);}
+
+  .flag-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);}
+  .flag-row:first-child{border-top:none;}
+  .flag-title{font-size:12.5px;font-weight:600;}
+  .switch{width:38px;height:22px;border-radius:12px;background:var(--card3);border:1px solid var(--line2);position:relative;cursor:pointer;flex-shrink:0;}
+  .switch .knob{width:16px;height:16px;border-radius:50%;background:var(--sub);position:absolute;top:2px;left:2px;transition:left .15s,background .15s;}
+  .switch.on{background:var(--cyan-dim);border-color:var(--cyan);}
+  .switch.on .knob{left:18px;background:var(--cyan);}
+
+  .stickybar{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg) 30%);padding:14px 16px 4px;}
+  .analyze-btn{width:100%;padding:15px;border-radius:13px;border:none;background:var(--cyan);color:#03222c;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .analyze-btn:disabled{opacity:.6;}
+  .err{font-size:11px;color:var(--red-text);margin-top:6px;text-align:center;}
+
+  .loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 16px;}
+  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--cyan);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading p{font-size:13px;color:var(--sub);margin:0;}
+
+  .result-card{background:var(--card);border:1px solid var(--cyan-dim);border-radius:16px;padding:18px;margin:14px 16px;}
+  .result-card.critical{border-color:#5a201c;}
+  .result-title{font-size:11.5px;font-weight:700;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin:0 0 10px;}
+  .priobig{display:flex;align-items:center;gap:10px;padding:14px;border-radius:12px;margin-bottom:16px;}
+  .priobig.critical{background:var(--red-dim);}
+  .priobig.urgent{background:var(--amber-dim);}
+  .priobig.stable{background:var(--emerald-dim);}
+  .priobig .picon{font-size:22px;}
+  .priobig .ptext{font-size:17px;font-weight:800;letter-spacing:.4px;}
+  .priobig.critical .ptext{color:var(--red-text);}
+  .priobig.urgent .ptext{color:var(--amber-text);}
+  .priobig.stable .ptext{color:var(--emerald);}
+  .subhead{font-size:11.5px;font-weight:700;color:var(--sub2);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;}
+  .risklist{display:flex;flex-direction:column;gap:6px;}
+  .riskitem{font-size:12.5px;color:var(--text);background:var(--card2);border-left:3px solid var(--red);padding:8px 10px;border-radius:6px;}
+  .abn-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:9px;padding:9px 11px;margin-bottom:6px;}
+  .abn-row .an{font-size:12.5px;font-weight:600;}
+  .abn-row .av{font-size:12.5px;font-family:'SF Mono',Consolas,monospace;color:var(--sub);}
+  .pillrow{display:flex;gap:10px;flex-wrap:wrap;}
+  .pill2{flex:1;min-width:120px;background:var(--card2);border-radius:10px;padding:11px;}
+  .pill2 .pl{font-size:10px;color:var(--sub2);font-weight:700;text-transform:uppercase;margin-bottom:4px;}
+  .pill2 .pv{font-size:14px;font-weight:700;}
+  .summary-box{background:var(--card2);border-left:3px solid var(--cyan);border-radius:8px;padding:12px;font-size:12.5px;line-height:1.6;color:var(--text);}
+  .ai-notice{display:flex;align-items:center;gap:8px;background:var(--amber-dim);border-radius:9px;padding:10px 12px;margin-top:14px;font-size:11.5px;color:var(--amber-text);}
+  .ai-notice .rv{font-size:10.5px;color:var(--sub);margin-top:2px;}
+  .send-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--emerald);color:#032218;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;}
+  .sent-box{background:var(--emerald-dim);border-radius:10px;padding:12px;text-align:center;margin-top:16px;}
+  .sent-box .ok{color:var(--emerald);font-weight:700;font-size:13px;}
+  .sent-box .del{color:var(--sub);font-size:11px;margin-top:4px;display:flex;align-items:center;gap:5px;justify-content:center;}
+  .notif-card{background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:12px;margin-top:10px;text-align:left;}
+  .notif-card .nt{font-size:11.5px;font-weight:700;margin-bottom:6px;}
+  .notif-card .nrow{font-size:11px;color:var(--sub);display:flex;justify-content:space-between;padding:2px 0;}
+  .secrow{display:flex;gap:10px;margin-top:14px;}
+  .secrow button{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;}
+
+  /* First aid accordion */
+  .fa-item{border-bottom:1px solid var(--line);padding:6px 8px;cursor:pointer;}
+  .fa-item:last-child{border-bottom:none;}
+  .fa-head{display:flex;align-items:center;gap:10px;padding:10px 4px;}
+  .fa-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .fa-icon.cpr{background:var(--red-dim);color:var(--red-text);}
+  .fa-icon.bleed{background:var(--red-dim);color:var(--red-text);}
+  .fa-icon.burn{background:var(--amber-dim);color:var(--amber-text);}
+  .fa-icon.choke{background:var(--cyan-dim);color:var(--cyan-text);}
+  .fa-icon.seizure{background:var(--cyan-dim);color:var(--cyan-text);}
+  .fa-title{flex:1;font-size:13.5px;font-weight:600;}
+  .fa-chev{color:var(--sub);font-size:12px;transition:transform .15s;}
+  .fa-item[data-open="true"] .fa-chev{transform:rotate(180deg);}
+  .fa-body{display:none;padding:2px 4px 14px 44px;}
+  .fa-item[data-open="true"] .fa-body{display:block;}
+  .fa-body p{font-size:11.5px;color:var(--amber-text);margin:0 0 8px;font-weight:600;}
+  .fa-body ul{margin:0;padding-left:16px;}
+  .fa-body li{font-size:12.5px;color:var(--sub);line-height:1.6;margin-bottom:4px;}
+  .metro{display:flex;align-items:center;gap:8px;margin-top:8px;}
+  .dot-pulse{width:12px;height:12px;border-radius:50%;background:var(--red);animation:pulse2 0.545s infinite;}
+  @keyframes pulse2{0%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.5;}100%{transform:scale(1);opacity:1;}}
+  .metro span{font-size:11px;color:var(--sub);}
+
+  /* SOS flow */
+  .steps{display:flex;align-items:center;gap:6px;margin:10px 0 6px;}
+  .step{flex:1;height:4px;border-radius:3px;background:var(--line);}
+  .step.done{background:var(--cyan);}
+  .steplabels{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:4px;}
+  .steplabels span.on{color:var(--cyan);font-weight:600;}
+  .dropzone{border:1.5px dashed var(--line2);border-radius:10px;padding:18px 10px;text-align:center;color:var(--sub);font-size:12px;margin-bottom:10px;cursor:pointer;}
+  .dropzone:hover{border-color:var(--cyan);color:var(--cyan-text);}
+  .sev{display:flex;gap:8px;}
+  .sev button{flex:1;padding:9px 4px;border-radius:8px;border:1px solid var(--line2);background:var(--card2);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;}
+  .sev button[data-sev="minor"].active{background:var(--emerald-dim);color:var(--emerald);border-color:var(--emerald);}
+  .sev button[data-sev="moderate"].active{background:var(--amber-dim);color:var(--amber-text);border-color:var(--amber);}
+  .sev button[data-sev="critical"].active{background:var(--red-dim);color:var(--red-text);border-color:var(--red);}
+  .qrow{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .qrow .qdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .qrow.critical .qdot{background:var(--red);}
+  .qrow.moderate .qdot{background:var(--amber);}
+  .qrow.minor .qdot{background:var(--emerald);}
+  .qrow.mine{border-color:var(--cyan);background:var(--cyan-dim);}
+  .qrow .qtext{flex:1;font-size:12px;}
+  .qrow .qtext .qtitle{font-weight:600;}
+  .qrow .qtext .qsub{color:var(--sub);font-size:11px;}
+  .qrow .qeta{font-size:11px;color:var(--sub);font-family:'SF Mono',Consolas,monospace;}
+
+  /* ===== DOCTOR DASHBOARD: LIVE MONITOR ===== */
+  .doctab{display:flex;gap:8px;padding:12px 16px 2px;}
+  .doctab button{flex:1;padding:9px 4px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;}
+  .doctab button.active{background:var(--cyan-dim);color:var(--cyan-text);border-color:var(--cyan);}
+  .live-summary{display:flex;gap:8px;padding:10px 16px 2px;}
+  .live-sum-card{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;}
+  .live-sum-card .lsv{font-size:18px;font-weight:800;font-family:'SF Mono',Consolas,monospace;}
+  .live-sum-card .lsl{font-size:9.5px;color:var(--sub2);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
+  .live-sum-card.critical .lsv{color:var(--red-text);}
+  .live-sum-card.urgent .lsv{color:var(--amber-text);}
+  .live-sum-card.stable .lsv{color:var(--emerald);}
+  .live-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
+  .live-card:hover{border-color:var(--cyan);}
+  .live-card.critical{border-color:#5a201c;background:linear-gradient(180deg,var(--card) 0%,rgba(240,69,63,.06) 100%);}
+  .live-card.urgent{border-color:#5c4210;}
+  .live-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .live-pid{font-size:13.5px;font-weight:700;}
+  .live-desc{font-size:10.5px;color:var(--sub);margin-top:1px;}
+  .live-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+  .live-badge.critical{background:var(--red-dim);color:var(--red-text);}
+  .live-badge.urgent{background:var(--amber-dim);color:var(--amber-text);}
+  .live-badge.stable{background:var(--emerald-dim);color:var(--emerald);}
+  .live-badge .ldot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse2 1.2s infinite;}
+  .live-vitals{display:flex;gap:8px;margin-bottom:10px;}
+  .live-vitals .lv{flex:1;background:var(--card2);border-radius:8px;padding:7px 4px;text-align:center;}
+  .live-vitals .lv .lvv{font-size:14px;font-weight:700;font-family:'SF Mono',Consolas,monospace;color:var(--text);}
+  .live-vitals .lv .lvv.warning{color:var(--amber-text);}
+  .live-vitals .lv .lvv.critical{color:var(--red-text);}
+  .live-vitals .lv .lvl{font-size:9px;color:var(--sub2);text-transform:uppercase;margin-top:2px;letter-spacing:.3px;}
+  .live-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--sub);border-top:1px solid var(--line);padding-top:9px;}
+  .live-empty{padding:34px 14px;text-align:center;color:var(--sub);font-size:12.5px;line-height:1.6;}
+
+  /* ===== ROLE SWITCHER (conditional rendering entry) ===== */
+  .roleswitch{overflow-x:auto;}
+  .roleswitch::-webkit-scrollbar{display:none;}
+  .role-btn{white-space:nowrap;}
+
+  /* ===== SOS: PHOTO CAPTURE + INFOGRAPHIC ===== */
+  .dropzone.has-photo{border-style:solid;border-color:var(--emerald);padding:10px;}
+  .photo-preview{width:100%;max-height:160px;object-fit:cover;border-radius:9px;display:block;margin-bottom:8px;}
+  .photo-chip{display:inline-flex;align-items:center;gap:6px;background:var(--emerald-dim);color:var(--emerald);font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;}
+  .infograph{display:flex;gap:8px;margin:12px 0 2px;}
+  .infograph .istep{flex:1;text-align:center;background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:10px 4px;position:relative;}
+  .infograph .istep.done{border-color:var(--cyan);background:var(--cyan-dim);}
+  .infograph .iicon{font-size:18px;margin-bottom:4px;}
+  .infograph .ilabel{font-size:9.5px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .infograph .istep.done .ilabel{color:var(--cyan-text);}
+
+  /* ===== SCREEN 5: LAB / DEPARTMENT DASHBOARD ===== */
+  .lab-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .lab-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .lab-id{font-size:13.5px;font-weight:700;}
+  .lab-sub{font-size:10.5px;color:var(--sub);margin-top:1px;}
+  .lab-status{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .lab-status.pending{background:var(--amber-dim);color:var(--amber-text);}
+  .lab-status.processing{background:var(--cyan-dim);color:var(--cyan-text);}
+  .lab-status.ready{background:var(--emerald-dim);color:var(--emerald);}
+  .lab-tests{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .lab-tests .tag{background:var(--card2);}
+  .lab-actions{display:flex;gap:8px;}
+  .lab-actions button{flex:1;padding:9px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;}
+  .lab-actions button:disabled{opacity:.4;cursor:default;}
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- ================= SCREEN 1: HOME ================= -->
+  <div id="viewHome">
+    <div class="roleswitch" id="roleSwitch">
+      <button class="role-btn active" data-role="citizen" onclick="selectRole('citizen',this)">🧑 Citizen</button>
+      <button class="role-btn" data-role="paramedic" onclick="selectRole('paramedic',this)">🚑 Paramedic</button>
+      <button class="role-btn" data-role="hospital_pro" onclick="selectRole('hospital_pro',this)">🩺 ER Doctor</button>
+      <button class="role-btn" data-role="lab_dept" onclick="selectRole('lab_dept',this)">🧪 Lab / Dept</button>
+    </div>
+    <div style="padding:8px 16px 0;">
+      <button class="svc-btn aid" style="width:100%;" onclick="continueAsRole()">Continue as selected role →</button>
+    </div>
+    <header>
+      <div class="brand">
+        <div class="name">AyuPulse</div>
+        <div class="sub">Emergency Response System</div>
+        <div class="hstatus"><span class="pdot"></span>System ready</div>
+      </div>
+      <div class="hright">
+        <button class="langbtn">English ▾</button>
+        <div class="connected"><span class="cdot"></span>Connected</div>
+      </div>
+    </header>
+
+    <div class="intro">
+      <h1>How can AyuPulse help?</h1>
+      <p>Choose an emergency service to continue.</p>
+    </div>
+
+    <div class="section">
+      <div class="svc-grid">
+        <div class="svc-card aid" id="cardFirstAid" onclick="goFirstAid()">
+          <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38d4f5" stroke-width="2"><path d="M12 2v8M8 6h8"/><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M12 13v5M9.5 15.5h5"/></svg></div>
+          <div class="svc-title">First aid</div>
+          <p class="svc-desc">Immediate guidance for an injured or unwell person</p>
+          <div class="tags"><span class="tag">CPR</span><span class="tag">Bleeding</span><span class="tag">Burns</span><span class="tag">Choking</span><span class="tag">Seizure</span></div>
+          <button class="svc-btn aid" onclick="event.stopPropagation();goFirstAid()">Start first aid</button>
+        </div>
+
+        <div class="svc-card sos" id="cardSOS" onclick="goSOS()">
+          <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff9b96" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div>
+          <div class="svc-title">SOS</div>
+          <p class="svc-desc">Report an emergency and request immediate assistance</p>
+          <div class="tags"><span class="tag">Emergency alert</span><span class="tag">Location</span><span class="tag">Ambulance</span></div>
+          <button class="svc-btn sos" onclick="event.stopPropagation();goSOS()">Send SOS</button>
+        </div>
+
+        <div class="svc-card aid" id="cardParamedic" style="display:none;" onclick="goIntake()">
+          <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38d4f5" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+          <div class="svc-title">Paramedic</div>
+          <p class="svc-desc">Rapid clinical intake and AI-assisted triage for a patient on scene</p>
+          <div class="tags"><span class="tag">Vitals</span><span class="tag">Symptoms</span><span class="tag">AI triage</span><span class="tag">Send to doctor</span></div>
+          <button class="svc-btn aid" onclick="event.stopPropagation();goIntake()">Start paramedic assessment</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="util">
+      <div class="util-row">
+        <div><div class="util-title">Call emergency services</div></div>
+        <button class="util-btn danger" onclick="toast('Dialing 108...')">Call 108</button>
+      </div>
+      <div class="util-row">
+        <div><div class="util-title">Location</div><div class="util-status"><span class="dot"></span>Location available</div></div>
+        <button class="util-btn" onclick="toast('Opening live location view')">View location</button>
+      </div>
+      <div class="util-row">
+        <div><div class="util-title">Hospital</div></div>
+        <button class="util-btn" onclick="toast('Nearest: Vijayawada GGH · 2.1 km')">Nearest hospital</button>
+      </div>
+    </div>
+
+    <div id="docPreviewLink" style="text-align:center;padding:18px 16px 4px;display:none;">
+      <button onclick="goDoctorDashboard()" style="background:none;border:none;color:var(--sub);font-size:11.5px;text-decoration:underline;cursor:pointer;">🩺 Open ER doctor dashboard (preview)</button>
+    </div>
+  </div>
+
+  <!-- ================= FIRST AID GUIDE ================= -->
+  <div id="viewFirstAid" class="hidden">
+    <div class="ihead">
+      <button class="backbtn" onclick="goHome()">← Back</button>
+      <h1>First aid guide</h1>
+      <p class="isub">Step-by-step guidance for common emergencies</p>
+      <div class="istatus-row">
+        <div class="istatus"><span class="dot"></span>Works offline</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:8px;">
+      <div class="fa-item" data-open="false" onclick="toggleFa(this)">
+        <div class="fa-head">
+          <div class="fa-icon cpr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <div class="fa-title">CPR / cardiac arrest</div>
+          <div class="fa-chev">▾</div>
+        </div>
+        <div class="fa-body">
+          <p>Check responsiveness and breathing. If absent, start chest compressions immediately.</p>
+          <ul>
+            <li>Push hard and fast in the center of the chest, about 2 inches deep.</li>
+            <li>Maintain a rate of 100–120 compressions per minute.</li>
+            <li>Let the chest fully recoil between compressions.</li>
+            <li>Continue until help arrives or the person responds.</li>
+          </ul>
+          <div class="metro"><div class="dot-pulse"></div><span>100–120 BPM pace guide — tap to start</span></div>
+        </div>
+      </div>
+
+      <div class="fa-item" data-open="false" onclick="toggleFa(this)">
+        <div class="fa-head">
+          <div class="fa-icon bleed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s7 8.5 7 13a7 7 0 1 1-14 0c0-4.5 7-13 7-13Z"/></svg></div>
+          <div class="fa-title">Severe bleeding</div>
+          <div class="fa-chev">▾</div>
+        </div>
+        <div class="fa-body">
+          <p>Do not remove any embedded object.</p>
+          <ul>
+            <li>Press down firmly on the wound with a clean cloth or bare hands.</li>
+            <li>Do not let go — maintain constant pressure.</li>
+            <li>If possible, raise the injured area above heart level.</li>
+            <li>Add more cloth on top if it soaks through; don't remove the first layer.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fa-item" data-open="false" onclick="toggleFa(this)">
+        <div class="fa-head">
+          <div class="fa-icon burn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5Z"/></svg></div>
+          <div class="fa-title">Burns</div>
+          <div class="fa-chev">▾</div>
+        </div>
+        <div class="fa-body">
+          <p>No ice, butter, or ointments on a fresh burn.</p>
+          <ul>
+            <li>Cool the burn under clean running water for 10–20 minutes.</li>
+            <li>Remove tight clothing or jewelry near the area before it swells.</li>
+            <li>Cover loosely with a clean, non-stick cloth.</li>
+            <li>Seek medical care for large, deep, or facial burns.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fa-item" data-open="false" onclick="toggleFa(this)">
+        <div class="fa-head">
+          <div class="fa-icon choke"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg></div>
+          <div class="fa-title">Choking</div>
+          <div class="fa-chev">▾</div>
+        </div>
+        <div class="fa-body">
+          <p>Ask "are you choking?" — if they can't speak or cough, act immediately.</p>
+          <ul>
+            <li>Give 5 firm slaps between the shoulder blades.</li>
+            <li>Follow with 5 quick upward abdominal thrusts (Heimlich maneuver).</li>
+            <li>Repeat the 5-and-5 cycle until the object is dislodged.</li>
+            <li>If they become unresponsive, begin CPR.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fa-item" data-open="false" onclick="toggleFa(this)">
+        <div class="fa-head">
+          <div class="fa-icon seizure"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div>
+          <div class="fa-title">Seizure</div>
+          <div class="fa-chev">▾</div>
+        </div>
+        <div class="fa-body">
+          <p>Do not restrain the person or put anything in their mouth.</p>
+          <ul>
+            <li>Cushion their head and clear hard or sharp objects away.</li>
+            <li>Time the seizure — call 108 if it lasts longer than 5 minutes.</li>
+            <li>Once movements stop, gently roll them onto their side.</li>
+            <li>Stay with them until they're fully alert.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="util" style="margin-bottom:20px;">
+      <div class="util-row">
+        <div><div class="util-title">Need more help?</div></div>
+        <button class="util-btn danger" onclick="toast('Dialing 108...')">Call 108</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SOS FLOW ================= -->
+  <div id="viewSOS" class="hidden">
+    <div class="ihead">
+      <button class="backbtn" onclick="goHome()">← Back</button>
+      <h1>Citizen emergency SOS</h1>
+      <p class="isub">🛰️ Location locked</p>
+      <div class="steps">
+        <div class="step done" id="sosStepbar1"></div>
+        <div class="step" id="sosStepbar2"></div>
+        <div class="step" id="sosStepbar3"></div>
+      </div>
+      <div class="steplabels">
+        <span id="sosSteplabel1" class="on">1 · SOS report</span>
+        <span id="sosSteplabel2">2 · First aid</span>
+        <span id="sosSteplabel3">3 · Priority dashboard</span>
+      </div>
+    </div>
+
+    <!-- STEP 1: SOS REPORT -->
+    <div id="sosStepReport">
+      <div class="card">
+        <h2>Incident capture</h2>
+        <div class="infograph">
+          <div class="istep done" id="infoStep1"><div class="iicon">📷</div><div class="ilabel">Capture</div></div>
+          <div class="istep" id="infoStep2"><div class="iicon">📝</div><div class="ilabel">Describe</div></div>
+          <div class="istep" id="infoStep3"><div class="iicon">📡</div><div class="ilabel">Broadcast</div></div>
+        </div>
+        <input type="file" id="sosPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleSosPhoto(event)">
+        <div class="dropzone" id="sosDropzone" onclick="document.getElementById('sosPhotoInput').click()" style="margin-top:12px;">📷 Tap to attach photo, video or audio of the scene</div>
+        <div class="field"><textarea id="sosDesc" rows="2" placeholder="Briefly describe what happened" oninput="sosDescChanged()"></textarea></div>
+        <h2 style="margin-top:4px;">Severity</h2>
+        <div class="sev" id="sosSev">
+          <button data-sev="minor" onclick="setSosSev(this)">Minor</button>
+          <button data-sev="moderate" onclick="setSosSev(this)">Moderate</button>
+          <button data-sev="critical" onclick="setSosSev(this)">Critical / unresponsive</button>
+        </div>
+      </div>
+      <div class="stickybar">
+        <button class="analyze-btn" style="background:var(--red);color:#fff;" onclick="sosBroadcast()">Broadcast & continue to first aid</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: FIRST AID (GATED) -->
+    <div id="sosStepAid" class="hidden">
+      <div class="card" style="border-color:#5a201c;background:var(--red-dim);">
+        <p style="font-size:13px;margin:0 0 12px;color:#fecaca;"><b>Ambulance en route · ETA 6 min.</b><br>Are you able and willing to give first-aid right now?</p>
+        <div style="display:flex;gap:8px;">
+          <button class="svc-btn aid" style="background:var(--emerald);color:#032218;" onclick="sosShowPath('yes')">Yes — I can help</button>
+          <button class="svc-btn aid" style="background:transparent;border:1px solid var(--red);color:#fecaca;" onclick="sosShowPath('no')">No — guide me</button>
+        </div>
+      </div>
+
+      <div id="sosPathYes" class="hidden card" style="padding:8px;">
+        <div class="fa-item" data-open="true">
+          <div class="fa-body" style="display:block;padding:10px 4px;">
+            <p>Chest compressions</p>
+            <ul><li>Push hard and fast in the center of the chest.</li></ul>
+            <div class="metro"><div class="dot-pulse"></div><span>100–120 BPM pace guide — playing</span></div>
+          </div>
+        </div>
+        <div class="fa-item" data-open="true"><div class="fa-body" style="display:block;padding:10px 4px;"><p>Heavy bleeding</p><ul><li>Press firmly on the wound with a clean cloth or bare hands. Do not let go.</li></ul></div></div>
+        <div class="fa-item" data-open="true"><div class="fa-body" style="display:block;padding:10px 4px;"><p>Choking</p><ul><li>5 firm slaps between the shoulder blades, then 5 quick upward abdominal thrusts.</li></ul></div></div>
+        <div class="fa-item" data-open="true"><div class="fa-body" style="display:block;padding:10px 4px;"><p>Burns</p><ul><li>Cool under clean running water for 10–20 minutes. No ice.</li></ul></div></div>
+        <div class="fa-item" data-open="true"><div class="fa-body" style="display:block;padding:10px 4px;"><p>Seizure</p><ul><li>Cushion the head, clear hard objects away. Nothing in the mouth.</li></ul></div></div>
+      </div>
+
+      <div id="sosPathNo" class="hidden card" style="padding:8px;">
+        <div class="fa-item" data-open="true"><div class="fa-body" style="display:block;padding:10px 4px;"><p>Recovery position</p><ul><li>Roll the person onto their side so the airway stays open and fluids can drain.</li></ul></div></div>
+        <div class="fa-item" data-open="true"><div class="fa-body" style="display:block;padding:10px 4px;"><p>Neck and spine care</p><ul><li>Kneel near their head, ask them to stay completely still.</li></ul></div></div>
+        <div class="fa-item" data-open="true">
+          <div class="fa-body" style="display:block;padding:10px 4px;">
+            <p>Hazard checklist</p>
+            <div class="flag-row" style="border-top:none;padding:5px 0;"><span class="flag-title" style="font-size:12px;">Turn off vehicle engines</span><input type="checkbox"></div>
+            <div class="flag-row" style="border-top:none;padding:5px 0;"><span class="flag-title" style="font-size:12px;">Keep the crowd back</span><input type="checkbox"></div>
+            <div class="flag-row" style="border-top:none;padding:5px 0;"><span class="flag-title" style="font-size:12px;">Wave down the ambulance</span><input type="checkbox"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stickybar">
+        <div class="secrow" style="margin-top:0;">
+          <button onclick="sosGoStep(1)">Back</button>
+          <button class="analyze-btn" id="sosToDashBtn" style="flex:1;opacity:.5;" onclick="sosGoStep(3)" disabled>Continue to dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: PRIORITY DASHBOARD -->
+    <div id="sosStepDash" class="hidden">
+      <div class="card">
+        <span class="prio-badge critical" id="sosDashSevPill" style="display:inline-flex;">Critical</span>
+        <div style="font-size:26px;font-weight:700;font-family:'SF Mono',Consolas,monospace;margin-top:6px;" id="sosDashEta">6 min</div>
+        <div style="font-size:11px;color:var(--sub);">Ambulance unit #04 · en route to you</div>
+      </div>
+
+      <div class="card">
+        <h2>Incident queue — ranked by priority</h2>
+        <div class="qrow critical mine"><div class="qdot"></div><div class="qtext"><div class="qtitle">Your report</div><div class="qsub">Unit #04 dispatched</div></div><div class="qeta">6 min</div></div>
+        <div class="qrow critical"><div class="qdot"></div><div class="qtext"><div class="qtitle">Cardiac event — MG Road</div><div class="qsub">Unit #01 dispatched</div></div><div class="qeta">3 min</div></div>
+        <div class="qrow moderate"><div class="qdot"></div><div class="qtext"><div class="qtitle">Fall injury — Benz Circle</div><div class="qsub">Unit #07 dispatched</div></div><div class="qeta">9 min</div></div>
+        <div class="qrow minor"><div class="qdot"></div><div class="qtext"><div class="qtitle">Minor collision — Bypass Rd</div><div class="qsub">Queued</div></div><div class="qeta">14 min</div></div>
+      </div>
+
+      <div class="stickybar">
+        <button onclick="sosGoStep(2)" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;">Back to first aid</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 2: CLINICAL INTAKE (PARAMEDIC) ================= -->
+  <div id="viewIntake" class="hidden">
+    <div class="ihead">
+      <button class="backbtn" onclick="goHome()">← Back</button>
+      <h1>AyuPulse Clinical Intake</h1>
+      <p class="isub">Rapid assessment & intelligent triage</p>
+      <div class="seg" id="prioSeg" style="margin-bottom:10px;">
+        <button class="crit-active" onclick="setIntakePriority('critical',this)">🔴 Critical</button>
+        <button onclick="setIntakePriority('normal',this)">🟢 Normal</button>
+      </div>
+      <div class="istatus-row">
+        <div class="istatus"><span class="dot"></span>AI analysis ready</div>
+        <div class="istatus"><span class="dot"></span>Data connection active</div>
+      </div>
+    </div>
+
+    <div id="intakeForm">
+      <!-- Patient identification -->
+      <div class="card">
+        <h2>Patient information</h2>
+        <div class="field"><label>Patient name</label><input type="text" id="fName" placeholder="Enter patient name or Unidentified Patient"></div>
+        <div class="field"><label>Age</label><input type="number" id="fAge" placeholder="e.g. 25"></div>
+        <div class="field"><label>Gender</label>
+          <div class="seg" id="genderSeg">
+            <button onclick="pickSeg(this,'genderSeg')">Male</button>
+            <button onclick="pickSeg(this,'genderSeg')">Female</button>
+            <button onclick="pickSeg(this,'genderSeg')">Other</button>
+          </div>
+        </div>
+        <div class="field"><label>Patient / incident ID</label><input type="text" id="fId" placeholder="AP-1042"></div>
+        <div class="field"><label>Level of consciousness</label>
+          <div class="seg" id="locSeg">
+            <button class="active" onclick="pickSeg(this,'locSeg')">Conscious</button>
+            <button onclick="pickSeg(this,'locSeg')">Altered / confused</button>
+            <button onclick="pickSeg(this,'locSeg')">Unconscious</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vitals -->
+      <div class="card">
+        <h2>Rapid vital signs</h2>
+        <div class="vgrid">
+          <div class="vcard">
+            <div class="vlabel">Heart rate</div>
+            <div class="vinput-row"><input type="number" id="vHR" value="88" oninput="updateVitals()"><span class="vunit">BPM</span></div>
+            <span class="vstate normal" id="vHRstate">NORMAL</span>
+          </div>
+          <div class="vcard">
+            <div class="vlabel">Blood pressure</div>
+            <div class="vinput-row"><input type="text" id="vBP" value="120/80" oninput="updateVitals()"><span class="vunit">mmHg</span></div>
+          </div>
+          <div class="vcard">
+            <div class="vlabel">Oxygen saturation</div>
+            <div class="vinput-row"><input type="number" id="vSpO2" value="97" oninput="updateVitals()"><span class="vunit">SpO2 %</span></div>
+            <span class="vstate normal" id="vSpO2state">NORMAL</span>
+          </div>
+          <div class="vcard">
+            <div class="vlabel">Temperature</div>
+            <div class="vinput-row"><input type="number" id="vTemp" value="98.6" step="0.1" oninput="updateVitals()"><span class="vunit">°F</span></div>
+          </div>
+          <div class="vcard full">
+            <div class="vlabel">Respiratory rate</div>
+            <div class="vinput-row"><input type="number" id="vRR" value="16" oninput="updateVitals()"><span class="vunit">breaths/min</span></div>
+            <div class="quickbtns" id="rrQuick">
+              <button onclick="setRR(this,12)">12</button>
+              <button onclick="setRR(this,16)">16</button>
+              <button onclick="setRR(this,20)">20</button>
+              <button onclick="setRR(this,24)">24</button>
+              <button onclick="setRR(this,28)">28+</button>
+            </div>
+          </div>
+          <div class="vcard full">
+            <div class="vlabel">Glasgow coma scale</div>
+            <div class="gcs-row">
+              <input type="range" id="vGCS" min="3" max="15" value="15" oninput="document.getElementById('gcsVal').textContent=this.value">
+              <span class="gcs-val" id="gcsVal">15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Symptoms -->
+      <div class="card">
+        <h2>Symptoms & observations</h2>
+        <div class="chips" id="symptomChips">
+          <div class="chip" onclick="toggleChip(this)">Chest pain</div>
+          <div class="chip" onclick="toggleChip(this)">Shortness of breath</div>
+          <div class="chip" onclick="toggleChip(this)">Severe bleeding</div>
+          <div class="chip" onclick="toggleChip(this)">Unconscious</div>
+          <div class="chip" onclick="toggleChip(this)">Seizure</div>
+          <div class="chip" onclick="toggleChip(this)">Head injury</div>
+          <div class="chip" onclick="toggleChip(this)">Spinal injury</div>
+          <div class="chip" onclick="toggleChip(this)">Burn</div>
+          <div class="chip" onclick="toggleChip(this)">Stroke symptoms</div>
+          <div class="chip" onclick="toggleChip(this)">High fever</div>
+          <div class="chip" onclick="toggleChip(this)">Minor injury</div>
+          <div class="chip" onclick="toggleChip(this)">Dizziness</div>
+          <div class="chip" onclick="toggleChip(this)">Other</div>
+        </div>
+        <div class="field" style="margin-top:12px;"><label>Additional clinical notes</label><textarea id="fNotes" rows="2" placeholder="Describe important observations..."></textarea></div>
+      </div>
+
+      <!-- Incident info -->
+      <div class="card">
+        <h2>Incident information</h2>
+        <div class="field"><label>Incident type</label>
+          <div class="chips" id="incidentChips">
+            <div class="chip" onclick="toggleSingle(this,'incidentChips')">Road accident</div>
+            <div class="chip" onclick="toggleSingle(this,'incidentChips')">Fall</div>
+            <div class="chip" onclick="toggleSingle(this,'incidentChips')">Medical emergency</div>
+            <div class="chip" onclick="toggleSingle(this,'incidentChips')">Fire / burn</div>
+            <div class="chip" onclick="toggleSingle(this,'incidentChips')">Injury / trauma</div>
+            <div class="chip" onclick="toggleSingle(this,'incidentChips')">Unknown</div>
+          </div>
+        </div>
+        <div class="field"><label>Location</label><input type="text" id="fLoc" placeholder="Current or reported location"></div>
+        <button class="util-btn" style="width:100%;" onclick="document.getElementById('fLoc').value='MG Road, Vijayawada (auto-detected)'">📍 Use current location</button>
+      </div>
+
+      <!-- Resource flags -->
+      <div class="card">
+        <h2>Preparation / resource flags</h2>
+        <div class="flag-row"><span class="flag-title">Reserve ICU bed</span><div class="switch" onclick="toggleSwitch(this)"><div class="knob"></div></div></div>
+        <div class="flag-row"><span class="flag-title">Alert trauma team</span><div class="switch" onclick="toggleSwitch(this)"><div class="knob"></div></div></div>
+        <div class="flag-row"><span class="flag-title">Prepare emergency room</span><div class="switch" onclick="toggleSwitch(this)"><div class="knob"></div></div></div>
+        <div class="flag-row"><span class="flag-title">Prepare blood / imaging</span><div class="switch" onclick="toggleSwitch(this)"><div class="knob"></div></div></div>
+      </div>
+
+      <div class="stickybar">
+        <button class="analyze-btn" id="analyzeBtn" onclick="analyzePatient()">Analyze patient with AI</button>
+        <div class="err hidden" id="formErr">Enter at least patient age and heart rate before analyzing.</div>
+      </div>
+    </div>
+
+    <div class="loading hidden" id="loadingBox">
+      <div class="spinner"></div>
+      <p>Analyzing clinical data...</p>
+    </div>
+
+    <div id="resultSection" class="hidden"></div>
+  </div>
+
+  <!-- ================= SCREEN 5: LAB / DEPARTMENT DASHBOARD ================= -->
+  <div id="viewLabDept" class="hidden">
+    <div class="ihead">
+      <button class="backbtn" onclick="goHome()">← Back</button>
+      <h1>Lab & sample department</h1>
+      <p class="isub">Sample collection and diagnostic test tracking</p>
+      <div class="istatus-row">
+        <div class="istatus"><span class="dot"></span>Lab feed active</div>
+      </div>
+    </div>
+    <div class="live-summary" id="labSummary"></div>
+    <div class="card" id="labItems" style="padding:6px;"></div>
+  </div>
+
+  <!-- ================= DOCTOR: REPORT LIST ================= -->
+  <div id="viewDoctorList" class="hidden">
+    <div class="ihead">
+      <button class="backbtn" onclick="goHome()">← Back</button>
+      <h1>ER clinical dashboard</h1>
+      <p class="isub">Triage reports sent by paramedics in the field</p>
+      <div class="istatus-row">
+        <div class="istatus"><span class="dot"></span>Live feed active</div>
+      </div>
+    </div>
+
+    <div class="doctab">
+      <button id="tabLiveBtn" class="active" onclick="switchDocTab('live')">🔴 Live monitor</button>
+      <button id="tabListBtn" onclick="switchDocTab('list')">All reports</button>
+    </div>
+
+    <div class="live-summary" id="liveSummary"></div>
+
+    <div class="card" id="doctorLiveItems" style="padding:6px;"></div>
+    <div class="card hidden" id="doctorListItems" style="padding:6px;"></div>
+  </div>
+
+  <!-- ================= DOCTOR: RESULT VIEW ================= -->
+  <div id="viewDoctorResult" class="hidden">
+    <div class="ihead">
+      <button class="backbtn" onclick="backToDoctorList()">← Back to dashboard</button>
+      <h1>Patient triage report</h1>
+      <p class="isub" id="drMeta">Request —</p>
+    </div>
+    <div id="doctorResultBody"></div>
+  </div>
+
+  <div class="toast" id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line2);color:var(--text);font-size:12.5px;padding:10px 16px;border-radius:10px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;"></div>
+</div>
+
+<script>
+var state={priority:'critical'};
+var sosRequests=[];
+var doctorReports=[];
+var labSamples=[];
+var currentParamedicRequest=null;
+var currentDoctorReportIdx=null;
+var currentLabIdx=null;
+var userRole='citizen';
+var sosPhotoDataUrl=null;
+
+/* ===== ROLE-BASED CONDITIONAL RENDERING =====
+   Mirrors: if (userRole === 'citizen') return <CitizenInputForm />; etc.
+   Each role routes straight into the screen built for that user type. */
+function selectRole(role,btn){
+  userRole=role;
+  document.querySelectorAll('#roleSwitch .role-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  applyRoleCards();
+}
+function applyRoleCards(){
+  var fa=document.getElementById('cardFirstAid');
+  var sos=document.getElementById('cardSOS');
+  var par=document.getElementById('cardParamedic');
+  var util=document.querySelector('.util');
+  var docLink=document.getElementById('docPreviewLink');
+  fa.style.display='none';
+  sos.style.display='none';
+  par.style.display='none';
+  if(util)util.style.display='none';
+  if(docLink)docLink.style.display='none';
+  if(userRole==='citizen'){fa.style.display='';sos.style.display='';if(util)util.style.display='';}
+  else if(userRole==='paramedic'){par.style.display='';}
+  else if(userRole==='hospital_pro'){if(docLink)docLink.style.display='';}
+  else if(userRole==='lab_dept'){}
+}
+function continueAsRole(){
+  if(userRole==='citizen')return goSOS();
+  if(userRole==='paramedic')return goIntake();
+  if(userRole==='hospital_pro')return goDoctorDashboard();
+  if(userRole==='lab_dept')return goLabDept();
+}
+
+function nowTime(){
+  var d=new Date();
+  return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity=1;
+  clearTimeout(window._tt);
+  window._tt=setTimeout(function(){t.style.opacity=0;},1800);
+}
+
+function goIntake(){
+  state.priority='critical';
+  document.getElementById('viewHome').classList.add('hidden');
+  document.getElementById('viewIntake').classList.remove('hidden');
+  var segBtns=document.querySelectorAll('#prioSeg button');
+  segBtns[0].classList.add('crit-active');segBtns[1].classList.remove('norm-active');
+  document.getElementById('fId').value='AP-'+(1000+Math.floor(Math.random()*900));
+  resetResult();
+  window.scrollTo(0,0);
+}
+function setIntakePriority(p,btn){
+  state.priority=p;
+  var segBtns=document.querySelectorAll('#prioSeg button');
+  segBtns[0].classList.toggle('crit-active', p==='critical');
+  segBtns[1].classList.toggle('norm-active', p==='normal');
+}
+function goHome(){
+  document.getElementById('viewIntake').classList.add('hidden');
+  document.getElementById('viewFirstAid').classList.add('hidden');
+  document.getElementById('viewSOS').classList.add('hidden');
+  document.getElementById('viewDoctorList').classList.add('hidden');
+  document.getElementById('viewDoctorResult').classList.add('hidden');
+  document.getElementById('viewLabDept').classList.add('hidden');
+  document.getElementById('viewHome').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function goDoctorDashboard(){
+  document.getElementById('viewHome').classList.add('hidden');
+  switchDocTab('live');
+  document.getElementById('viewDoctorList').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function goFirstAid(){
+  document.getElementById('viewHome').classList.add('hidden');
+  document.getElementById('viewFirstAid').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function toggleFa(el){
+  var open=el.getAttribute('data-open')==='true';
+  document.querySelectorAll('.fa-item').forEach(function(i){i.setAttribute('data-open','false');});
+  el.setAttribute('data-open', open?'false':'true');
+}
+
+function goSOS(){
+  document.getElementById('viewHome').classList.add('hidden');
+  document.getElementById('viewSOS').classList.remove('hidden');
+  sosGoStep(1);
+  window.scrollTo(0,0);
+}
+function handleSosPhoto(evt){
+  var file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    sosPhotoDataUrl=e.target.result;
+    var dz=document.getElementById('sosDropzone');
+    dz.classList.add('has-photo');
+    dz.innerHTML='<img class="photo-preview" src="'+sosPhotoDataUrl+'"><span class="photo-chip">✓ Photo attached — tap to retake</span>';
+    document.getElementById('infoStep1').classList.add('done');
+    toast('Photo attached to SOS report');
+  };
+  reader.readAsDataURL(file);
+}
+function sosDescChanged(){
+  var val=document.getElementById('sosDesc').value.trim();
+  document.getElementById('infoStep2').classList.toggle('done', val.length>0);
+}
+function setSosSev(btn){
+  document.querySelectorAll('#sosSev button').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+function sosShowPath(which){
+  document.getElementById('sosPathYes').classList.toggle('hidden', which!=='yes');
+  document.getElementById('sosPathNo').classList.toggle('hidden', which!=='no');
+  var btn=document.getElementById('sosToDashBtn');
+  btn.disabled=false;btn.style.opacity=1;
+}
+function sosBroadcast(){
+  var desc=document.getElementById('sosDesc').value||'Unspecified incident';
+  var sevBtn=document.querySelector('#sosSev button.active');
+  var sev=sevBtn?sevBtn.dataset.sev:'critical';
+  var id='SOS-'+(1000+Math.floor(Math.random()*900));
+  document.getElementById('infoStep3').classList.add('done');
+  sosRequests.push({id:id,desc:desc,severity:sev,time:nowTime(),status:'pending',photo:!!sosPhotoDataUrl});
+  toast(sosPhotoDataUrl?'Request + photo broadcast to nearest paramedic unit':'Request broadcast to nearest paramedic unit');
+  sosGoStep(2);
+}
+function sosGoStep(n){
+  var steps=['sosStepReport','sosStepAid','sosStepDash'];
+  steps.forEach(function(id,i){document.getElementById(id).classList.toggle('hidden', i!==(n-1));});
+  for(var i=1;i<=3;i++){
+    document.getElementById('sosStepbar'+i).classList.toggle('done', i<=n);
+    document.getElementById('sosSteplabel'+i).classList.toggle('on', i===n);
+  }
+  if(n===3){
+    var sev=document.querySelector('#sosSev button.active');
+    var sevVal=sev?sev.dataset.sev:'critical';
+    var pill=document.getElementById('sosDashSevPill');
+    pill.className='prio-badge '+(sevVal==='critical'?'critical':'normal');
+    pill.style.display='inline-flex';
+    pill.textContent=sevVal.charAt(0).toUpperCase()+sevVal.slice(1);
+  }
+  window.scrollTo(0,0);
+}
+
+function pickSeg(btn,groupId){
+  document.querySelectorAll('#'+groupId+' button').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+function toggleChip(el){el.classList.toggle('sel');}
+function toggleSingle(el,groupId){
+  document.querySelectorAll('#'+groupId+' .chip').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+}
+function toggleSwitch(el){el.classList.toggle('on');}
+function setRR(btn,val){
+  document.getElementById('vRR').value=val;
+  document.querySelectorAll('#rrQuick button').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  updateVitals();
+}
+
+function classify(val,low,high){
+  if(val===''||val===null||isNaN(val))return null;
+  if(val<low)return 'low';
+  if(val>high)return 'high';
+  return 'normal';
+}
+function updateVitals(){
+  var hr=parseFloat(document.getElementById('vHR').value);
+  var spo2=parseFloat(document.getElementById('vSpO2').value);
+  var hrEl=document.getElementById('vHRstate');
+  if(!isNaN(hr)){
+    if(hr<60){hrEl.textContent='LOW';hrEl.className='vstate warning';}
+    else if(hr>100){hrEl.textContent='ELEVATED';hrEl.className='vstate warning';}
+    else{hrEl.textContent='NORMAL';hrEl.className='vstate normal';}
+  }
+  var spEl=document.getElementById('vSpO2state');
+  if(!isNaN(spo2)){
+    if(spo2<90){spEl.textContent='CRITICAL';spEl.className='vstate critical';}
+    else if(spo2<95){spEl.textContent='WARNING';spEl.className='vstate warning';}
+    else{spEl.textContent='NORMAL';spEl.className='vstate normal';}
+  }
+}
+updateVitals();
+applyRoleCards();
+
+function resetResult(){
+  document.getElementById('intakeForm').classList.remove('hidden');
+  document.getElementById('loadingBox').classList.add('hidden');
+  document.getElementById('resultSection').classList.add('hidden');
+  document.getElementById('resultSection').innerHTML='';
+  document.getElementById('formErr').classList.add('hidden');
+}
+
+function analyzePatient(){
+  var age=document.getElementById('fAge').value;
+  var hr=document.getElementById('vHR').value;
+  if(!age || !hr){
+    document.getElementById('formErr').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('formErr').classList.add('hidden');
+  document.getElementById('intakeForm').classList.add('hidden');
+  document.getElementById('loadingBox').classList.remove('hidden');
+  setTimeout(runAnalysis,1200);
+}
+
+function runAnalysis(){
+  document.getElementById('loadingBox').classList.add('hidden');
+
+  var name=document.getElementById('fName').value||'Unidentified patient';
+  var age=parseInt(document.getElementById('fAge').value)||null;
+  var gender=(document.querySelector('#genderSeg button.active')||{}).textContent||'Unspecified';
+  var pid=document.getElementById('fId').value||'AP-0000';
+  var loc=(document.querySelector('#locSeg button.active')||{}).textContent||'Conscious';
+  var hr=parseFloat(document.getElementById('vHR').value)||0;
+  var bp=document.getElementById('vBP').value;
+  var spo2=parseFloat(document.getElementById('vSpO2').value)||0;
+  var rr=parseFloat(document.getElementById('vRR').value)||0;
+  var temp=parseFloat(document.getElementById('vTemp').value)||0;
+  var gcs=parseInt(document.getElementById('vGCS').value)||15;
+  var symptoms=Array.from(document.querySelectorAll('#symptomChips .chip.sel')).map(function(c){return c.textContent;});
+  var notes=document.getElementById('fNotes').value;
+  var incidentType=(document.querySelector('#incidentChips .chip.sel')||{}).textContent||'Unknown';
+
+  var severeSymptoms=['Severe bleeding','Unconscious','Seizure','Stroke symptoms','Head injury','Spinal injury'];
+  var riskFlags=[];
+  var score=0;
+
+  if(spo2 && spo2<90){riskFlags.push('Severe hypoxia');score+=3;}
+  else if(spo2 && spo2<95){riskFlags.push('Mild hypoxia');score+=1;}
+
+  if(hr>130||hr<50){riskFlags.push(hr>130?'Severely elevated heart rate':'Severe bradycardia');score+=2;}
+  else if(hr>100){riskFlags.push('Elevated heart rate');score+=1;}
+  else if(hr<60&&hr>0){riskFlags.push('Bradycardia');score+=1;}
+
+  if(rr>=28||( rr<10 && rr>0)){riskFlags.push('Severe respiratory distress');score+=2;}
+  else if(rr>=24){riskFlags.push('Respiratory distress risk');score+=1;}
+
+  if(loc==='Unconscious'){riskFlags.push('Unresponsive patient');score+=3;}
+  else if(loc==='Altered / confused'){riskFlags.push('Altered mental status');score+=1;}
+
+  if(gcs<9){riskFlags.push('Severe GCS impairment');score+=3;}
+  else if(gcs<13){riskFlags.push('Moderate GCS impairment');score+=1;}
+
+  symptoms.forEach(function(s){
+    if(severeSymptoms.indexOf(s)!==-1){score+=2;riskFlags.push(s+' reported');}
+    else if(s==='Chest pain'){riskFlags.push('Possible cardiac involvement');score+=1;}
+    else if(s==='Shortness of breath'){riskFlags.push('Respiratory compromise reported');score+=1;}
+  });
+
+  if(state.priority==='critical')score+=1;
+
+  var priority,urgency,careArea;
+  if(score>=6){priority='CRITICAL';urgency='IMMEDIATE';careArea='Emergency / trauma';}
+  else if(score>=2){priority='URGENT';urgency='URGENT';careArea='General ER';}
+  else{priority='STABLE';urgency='ROUTINE';careArea='Observation / routine care';}
+
+  var abnormal=[];
+  if(spo2 && spo2<95)abnormal.push({name:'SpO2',val:spo2+' %',state:spo2<90?'critical':'warning'});
+  if(hr>100||( hr<60 && hr>0))abnormal.push({name:'Heart rate',val:hr+' BPM',state:(hr>130||hr<50)?'critical':'warning'});
+  if(rr>=24||(rr<10&&rr>0))abnormal.push({name:'Respiratory rate',val:rr+'/min',state:rr>=28?'critical':'warning'});
+  if(temp>=100.4)abnormal.push({name:'Temperature',val:temp+' °F',state:temp>=103?'critical':'warning'});
+  if(gcs<15)abnormal.push({name:'Glasgow coma scale',val:gcs+'/15',state:gcs<9?'critical':'warning'});
+
+  var ageStr=age?age+'-year-old':'Age unspecified';
+  var genderStr=gender.toLowerCase()!=='unspecified'?gender.toLowerCase():'patient';
+  var symptomStr=symptoms.length?symptoms.join(', ').toLowerCase()+'. ':'No specific symptoms reported. ';
+  var riskPhrase=priority==='CRITICAL'?'a high-risk presentation requiring immediate clinical evaluation':
+                  priority==='URGENT'?'a moderate-risk presentation warranting prompt clinical evaluation':
+                  'a low-risk, largely stable presentation suitable for routine evaluation';
+  var summary=ageStr+' '+genderStr+' with SpO2 '+(spo2||'--')+'%, HR '+(hr||'--')+' BPM and respiratory rate '+(rr||'--')+'/min. Patient reports '+symptomStr+'Current findings indicate '+riskPhrase+'.';
+
+  var structured={
+    patient:{name:name,age:age,gender:gender,id:pid,consciousness:loc},
+    priority:state.priority,
+    vitals:{heart_rate:hr,blood_pressure:bp,spo2:spo2,respiratory_rate:rr,temperature:temp,gcs:gcs},
+    symptoms:symptoms,
+    incident_type:incidentType,
+    notes:notes,
+    location:document.getElementById('fLoc').value,
+    resource_flags:Array.from(document.querySelectorAll('.switch.on')).map(function(s){return s.previousElementSibling?s.previousElementSibling.textContent:'';})
+  };
+  console.log('Structured assessment object:',structured);
+  console.log('AI analysis result:',{priority:priority,risk_flags:riskFlags,abnormal_vitals:abnormal,urgency:urgency,care_area:careArea,doctor_summary:summary});
+
+  renderResult({priority:priority,urgency:urgency,careArea:careArea,riskFlags:riskFlags,abnormal:abnormal,summary:summary,pid:pid,name:name,desc:incidentType,hr:hr,spo2:spo2});
+}
+
+function renderResult(r){
+  var pClass=r.priority==='CRITICAL'?'critical':r.priority==='URGENT'?'urgent':'stable';
+  var pIcon=r.priority==='CRITICAL'?'🔴':r.priority==='URGENT'?'🟠':'🟢';
+  var riskHtml=r.riskFlags.length?r.riskFlags.map(function(f){return '<div class="riskitem">'+f+'</div>';}).join(''):'<div class="riskitem" style="border-color:var(--emerald);">No significant risk flags identified</div>';
+  var abnHtml=r.abnormal.length?r.abnormal.map(function(a){return '<div class="abn-row"><span class="an">'+a.name+'</span><span class="av">'+a.val+' &nbsp; <span class="vstate '+a.state+'">'+a.state.toUpperCase()+'</span></span></div>';}).join(''):'<div class="abn-row"><span class="an">All vitals within normal range</span></div>';
+
+  window._lastIntakeResult=r;
+
+  var html=''+
+  '<div class="result-card '+pClass+'">'+
+    '<div class="result-title">AI triage result</div>'+
+    '<div class="priobig '+pClass+'"><span class="picon">'+pIcon+'</span><span class="ptext">'+r.priority+'</span></div>'+
+    '<div class="subhead">Risk flags</div>'+
+    '<div class="risklist">'+riskHtml+'</div>'+
+    '<div class="subhead">Key abnormalities</div>'+
+    abnHtml+
+    '<div class="pillrow" style="margin-top:14px;">'+
+      '<div class="pill2"><div class="pl">Recommended urgency</div><div class="pv">'+r.urgency+'</div></div>'+
+      '<div class="pill2"><div class="pl">Recommended care area</div><div class="pv">'+r.careArea+'</div></div>'+
+    '</div>'+
+    '<div class="subhead">Doctor summary</div>'+
+    '<div class="summary-box">'+r.summary+'</div>'+
+    '<div class="ai-notice"><span>⚠️</span><div><div>AI decision support — requires clinical verification</div><div class="rv">Clinician review: pending</div></div></div>'+
+    '<button class="send-btn" id="sendBtn" onclick="sendToDoctor()">Send triage result to doctor</button>'+
+    '<div id="sentBox"></div>'+
+    '<div class="secrow">'+
+      '<button onclick="editInput()">Edit input</button>'+
+      '<button onclick="newPatient()">New patient</button>'+
+    '</div>'+
+  '</div>';
+
+  var sec=document.getElementById('resultSection');
+  sec.innerHTML=html;
+  sec.classList.remove('hidden');
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function sendToDoctor(){
+  var r=window._lastIntakeResult;
+  var btn=document.getElementById('sendBtn');
+  btn.disabled=true;btn.style.opacity=0.5;
+  var t=nowTime();
+  var keyAbn=r.abnormal.length?(r.abnormal[0].name+' '+r.abnormal[0].val):'stable vitals';
+
+  doctorReports.unshift({
+    id:r.pid+'-R',
+    reqId:r.pid,
+    desc:r.name+' · '+r.desc,
+    time:t,
+    ts:Date.now(),
+    priority:r.priority,
+    urgency:r.urgency,
+    careArea:r.careArea,
+    riskFlags:r.riskFlags,
+    abnormal:r.abnormal,
+    summary:r.summary,
+    hr:r.hr,
+    spo2:r.spo2,
+    reviewed:false
+  });
+
+  document.getElementById('sentBox').innerHTML=
+    '<div class="sent-box">'+
+      '<div class="ok">✓ Assessment sent successfully</div>'+
+      '<div class="del"><span style="width:6px;height:6px;border-radius:50%;background:var(--emerald);display:inline-block;"></span>Delivered to ER clinical dashboard</div>'+
+      '<div class="notif-card">'+
+        '<div class="nt">New patient triage alert</div>'+
+        '<div class="nrow"><span>Patient ID</span><span>'+r.pid+'</span></div>'+
+        '<div class="nrow"><span>Priority</span><span>'+r.priority+'</span></div>'+
+        '<div class="nrow"><span>Key abnormality</span><span>'+keyAbn+'</span></div>'+
+        '<div class="nrow"><span>Assessed at</span><span>'+t+'</span></div>'+
+      '</div>'+
+      '<button class="util-btn" style="margin-top:12px;" onclick="goDoctorDashboard()">Open doctor dashboard →</button>'+
+    '</div>';
+}
+
+function editInput(){
+  document.getElementById('intakeForm').classList.remove('hidden');
+  document.getElementById('resultSection').classList.add('hidden');
+  window.scrollTo(0,0);
+}
+function newPatient(){
+  document.getElementById('fName').value='';
+  document.getElementById('fAge').value='';
+  document.getElementById('fId').value='AP-'+(1000+Math.floor(Math.random()*900));
+  document.querySelectorAll('#genderSeg button').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('#locSeg button').forEach(function(b){b.classList.remove('active');});
+  document.querySelector('#locSeg button').classList.add('active');
+  document.getElementById('vHR').value=88;document.getElementById('vBP').value='120/80';
+  document.getElementById('vSpO2').value=97;document.getElementById('vRR').value=16;
+  document.getElementById('vTemp').value=98.6;document.getElementById('vGCS').value=15;
+  document.getElementById('gcsVal').textContent=15;
+  updateVitals();
+  document.querySelectorAll('#symptomChips .chip').forEach(function(c){c.classList.remove('sel');});
+  document.querySelectorAll('#incidentChips .chip').forEach(function(c){c.classList.remove('sel');});
+  document.querySelectorAll('#rrQuick button').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('fNotes').value='';
+  document.getElementById('fLoc').value='';
+  document.querySelectorAll('.switch').forEach(function(s){s.classList.remove('on');});
+  resetResult();
+  window.scrollTo(0,0);
+}
+/* ================= DOCTOR ================= */
+function renderResultBlock(r){
+  var pClass=r.priority==='CRITICAL'?'critical':r.priority==='URGENT'?'urgent':'stable';
+  var pIcon=r.priority==='CRITICAL'?'🔴':r.priority==='URGENT'?'🟠':'🟢';
+  var riskHtml=r.riskFlags.length?r.riskFlags.map(function(f){return '<div class="riskitem">'+f+'</div>';}).join(''):'<div class="riskitem" style="border-color:var(--emerald);">No significant risk flags identified</div>';
+  var abnHtml=r.abnormal.length?r.abnormal.map(function(a){return '<div class="abn-row"><span class="an">'+a.name+'</span><span class="av">'+a.val+' &nbsp; <span class="vstate '+a.state+'">'+a.state.toUpperCase()+'</span></span></div>';}).join(''):'<div class="abn-row"><span class="an">All entered vitals within normal range</span></div>';
+  return ''+
+  '<div class="result-card '+pClass+'">'+
+    '<div class="result-title">AI triage result</div>'+
+    '<div class="priobig '+pClass+'"><span class="picon">'+pIcon+'</span><span class="ptext">'+r.priority+'</span></div>'+
+    '<div class="subhead">Risk flags</div>'+
+    '<div class="risklist">'+riskHtml+'</div>'+
+    '<div class="subhead">Key abnormalities</div>'+
+    abnHtml+
+    '<div class="pillrow" style="margin-top:14px;">'+
+      '<div class="pill2"><div class="pl">Recommended urgency</div><div class="pv">'+r.urgency+'</div></div>'+
+      '<div class="pill2"><div class="pl">Recommended care area</div><div class="pv">'+r.careArea+'</div></div>'+
+    '</div>'+
+    '<div class="subhead">Summary</div>'+
+    '<div class="summary-box">'+r.summary+'</div>'+
+    '<div class="ai-notice"><span>⚠️</span><div><div>AI decision support — requires clinical verification</div><div class="rv">Clinician review: '+(r.reviewed?'complete':'pending')+'</div></div></div>'+
+  '</div>';
+}
+function switchDocTab(tab){
+  document.getElementById('tabLiveBtn').classList.toggle('active', tab==='live');
+  document.getElementById('tabListBtn').classList.toggle('active', tab==='list');
+  document.getElementById('doctorLiveItems').classList.toggle('hidden', tab!=='live');
+  document.getElementById('doctorListItems').classList.toggle('hidden', tab!=='list');
+  document.getElementById('liveSummary').classList.toggle('hidden', tab!=='live');
+  if(tab==='live'){renderDoctorLive();}else{renderDoctorList();}
+}
+
+function timeAgo(ts){
+  var s=Math.floor((Date.now()-ts)/1000);
+  if(s<5)return 'Just now';
+  if(s<60)return s+'s ago';
+  var m=Math.floor(s/60);
+  if(m<60)return m+'m ago';
+  var h=Math.floor(m/60);
+  return h+'h ago';
+}
+
+function renderLiveSummary(){
+  var box=document.getElementById('liveSummary');
+  var c=doctorReports.filter(function(r){return r.priority==='CRITICAL';}).length;
+  var u=doctorReports.filter(function(r){return r.priority==='URGENT';}).length;
+  var s=doctorReports.filter(function(r){return r.priority==='STABLE';}).length;
+  box.innerHTML=
+    '<div class="live-sum-card critical"><div class="lsv">'+c+'</div><div class="lsl">Critical</div></div>'+
+    '<div class="live-sum-card urgent"><div class="lsv">'+u+'</div><div class="lsl">Urgent</div></div>'+
+    '<div class="live-sum-card stable"><div class="lsv">'+s+'</div><div class="lsl">Stable</div></div>';
+}
+
+function renderDoctorLive(){
+  renderLiveSummary();
+  var box=document.getElementById('doctorLiveItems');
+  if(!doctorReports.length){
+    box.innerHTML='<div class="live-empty">No live results yet.<br>Reports will appear here in real time the moment a paramedic sends an AI triage assessment.</div>';
+    return;
+  }
+  var weight={CRITICAL:0,URGENT:1,STABLE:2};
+  var sorted=doctorReports.map(function(r,i){return {r:r,i:i};}).sort(function(a,b){
+    return (weight[a.r.priority]-weight[b.r.priority])||(b.r.ts-a.r.ts);
+  });
+  box.innerHTML=sorted.map(function(obj){
+    var r=obj.r,idx=obj.i;
+    var pClass=r.priority==='CRITICAL'?'critical':r.priority==='URGENT'?'urgent':'stable';
+    var hr=r.hr||0, spo2=r.spo2||0;
+    var hrClass=(hr>130||(hr<50&&hr>0))?'critical':(hr>100||(hr<60&&hr>0))?'warning':'';
+    var spClass=(spo2&&spo2<90)?'critical':(spo2&&spo2<95)?'warning':'';
+    return '<div class="live-card '+pClass+'" onclick="openDoctorReport('+idx+')">'+
+      '<div class="live-head">'+
+        '<div><div class="live-pid">'+r.reqId+'</div><div class="live-desc">'+r.desc+'</div></div>'+
+        '<div class="live-badge '+pClass+'"><span class="ldot"></span>'+r.priority+'</div>'+
+      '</div>'+
+      '<div class="live-vitals">'+
+        '<div class="lv"><div class="lvv '+hrClass+'">'+(hr||'--')+'</div><div class="lvl">HR bpm</div></div>'+
+        '<div class="lv"><div class="lvv '+spClass+'">'+(spo2||'--')+'%</div><div class="lvl">SpO2</div></div>'+
+        '<div class="lv"><div class="lvv" style="font-size:11.5px;">'+r.careArea+'</div><div class="lvl">Care area</div></div>'+
+      '</div>'+
+      '<div class="live-foot">'+
+        '<span>'+(r.reviewed?'✓ Reviewed':'● Awaiting review')+'</span>'+
+        '<span class="agoLabel" data-ts="'+r.ts+'">'+timeAgo(r.ts)+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+setInterval(function(){
+  var labels=document.querySelectorAll('.agoLabel');
+  for(var i=0;i<labels.length;i++){
+    labels[i].textContent=timeAgo(parseInt(labels[i].getAttribute('data-ts'),10));
+  }
+},5000);
+
+function renderDoctorList(){
+  var box=document.getElementById('doctorListItems');
+  if(!doctorReports.length){
+    box.innerHTML='<div style="padding:20px 10px;text-align:center;color:var(--sub);font-size:12.5px;">No reports yet. Reports appear here once a paramedic analyzes and sends an assessment.</div>';
+    return;
+  }
+  box.innerHTML=doctorReports.map(function(r,i){
+    var sevClass=r.priority==='CRITICAL'?'critical':r.priority==='URGENT'?'moderate':'minor';
+    var keyAbn=r.abnormal.length?(r.abnormal[0].name+' '+r.abnormal[0].val):'Stable vitals';
+    return '<div class="qrow '+sevClass+'" style="align-items:flex-start;cursor:pointer;" onclick="openDoctorReport('+i+')">'+
+      '<div class="qdot" style="margin-top:5px;"></div>'+
+      '<div class="qtext"><div class="qtitle">'+r.reqId+' · '+r.priority+'</div>'+
+      '<div class="qsub">'+keyAbn+'</div>'+
+      '<div class="qsub">'+(r.reviewed?'<span style="color:var(--emerald);">✓ Reviewed</span>':'<span style="color:var(--amber-text);">● Awaiting review</span>')+' &nbsp;·&nbsp; '+r.time+'</div></div>'+
+      '<button class="util-btn" onclick="event.stopPropagation();openDoctorReport('+i+')">Open</button>'+
+    '</div>';
+  }).join('');
+}
+
+function openDoctorReport(idx){
+  currentDoctorReportIdx=idx;
+  var r=doctorReports[idx];
+  document.getElementById('drMeta').textContent=r.reqId+' · '+r.desc+' · sent '+r.time;
+  var body=document.getElementById('doctorResultBody');
+  var labBtn=r.labOrdered?
+    '<div style="text-align:center;color:var(--cyan-text);font-size:12.5px;font-weight:600;">🧪 Lab sample ordered — tracking in Lab / Dept dashboard</div>':
+    '<button class="util-btn" style="width:100%;" onclick="orderLabTest()">🧪 Order lab test (CBC + basic panel)</button>';
+  body.innerHTML=renderResultBlock(r)+
+    '<div class="card">'+
+      (r.reviewed?
+        '<div style="text-align:center;color:var(--emerald);font-size:12.5px;font-weight:600;">✓ Marked as reviewed</div>':
+        '<button class="send-btn" onclick="markReviewed()">Mark as reviewed</button>')+
+    '</div>'+
+    '<div class="card">'+labBtn+'</div>';
+  document.getElementById('viewDoctorList').classList.add('hidden');
+  document.getElementById('viewDoctorResult').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function markReviewed(){
+  doctorReports[currentDoctorReportIdx].reviewed=true;
+  openDoctorReport(currentDoctorReportIdx);
+  toast('Marked as reviewed');
+}
+function orderLabTest(){
+  var r=doctorReports[currentDoctorReportIdx];
+  r.labOrdered=true;
+  labSamples.unshift({
+    sampleId:'LAB-'+(1000+Math.floor(Math.random()*900)),
+    pid:r.reqId,
+    desc:r.desc,
+    priority:r.priority,
+    tests:['CBC','Basic metabolic panel'],
+    status:'pending',
+    ts:Date.now()
+  });
+  openDoctorReport(currentDoctorReportIdx);
+  toast('Lab test ordered — sent to Lab / Dept dashboard');
+}
+function backToDoctorList(){
+  document.getElementById('viewDoctorResult').classList.add('hidden');
+  var onListTab=document.getElementById('tabListBtn').classList.contains('active');
+  switchDocTab(onListTab?'list':'live');
+  document.getElementById('viewDoctorList').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+/* ================= SCREEN 5: LAB / DEPARTMENT ================= */
+function goLabDept(){
+  document.getElementById('viewHome').classList.add('hidden');
+  renderLabDept();
+  document.getElementById('viewLabDept').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function renderLabDept(){
+  var sumBox=document.getElementById('labSummary');
+  var pend=labSamples.filter(function(s){return s.status==='pending';}).length;
+  var proc=labSamples.filter(function(s){return s.status==='processing';}).length;
+  var ready=labSamples.filter(function(s){return s.status==='ready';}).length;
+  sumBox.innerHTML=
+    '<div class="live-sum-card urgent"><div class="lsv">'+pend+'</div><div class="lsl">Pending</div></div>'+
+    '<div class="live-sum-card"><div class="lsv" style="color:var(--cyan-text);">'+proc+'</div><div class="lsl">Processing</div></div>'+
+    '<div class="live-sum-card stable"><div class="lsv">'+ready+'</div><div class="lsl">Ready</div></div>';
+
+  var box=document.getElementById('labItems');
+  if(!labSamples.length){
+    box.innerHTML='<div class="live-empty">No sample or lab requests yet.<br>They appear here as soon as a doctor orders a test from a triage report.</div>';
+    return;
+  }
+  box.innerHTML=labSamples.map(function(s,i){
+    var stClass=s.status;
+    var stLabel=s.status==='pending'?'● Pending collection':s.status==='processing'?'⏳ Processing':'✓ Result ready';
+    return '<div class="lab-card">'+
+      '<div class="lab-head">'+
+        '<div><div class="lab-id">'+s.sampleId+'</div><div class="lab-sub">'+s.pid+' · '+s.desc+'</div></div>'+
+        '<div class="lab-status '+stClass+'">'+stLabel+'</div>'+
+      '</div>'+
+      '<div class="lab-tests">'+s.tests.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'</div>'+
+      '<div class="lab-actions">'+
+        '<button '+(s.status!=='pending'?'disabled':'')+' onclick="advanceLab('+i+',\'processing\')">Mark collected</button>'+
+        '<button '+(s.status!=='processing'?'disabled':'')+' onclick="advanceLab('+i+',\'ready\')">Result ready</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function advanceLab(idx,newStatus){
+  labSamples[idx].status=newStatus;
+  renderLabDept();
+  toast(newStatus==='processing'?'Sample marked collected':'Result marked ready — visible to ER doctor');
+}
+</script>
+</body>
+</html>
